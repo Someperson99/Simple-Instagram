@@ -2,11 +2,16 @@ package com.example.simpleinstagram;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.parse.LogInCallback;
+import com.parse.ParseException;
+import com.parse.ParseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -16,6 +21,10 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        if(ParseUser.getCurrentUser() != null){ // someone signed in already
+            goMainActivity();
+        }
 
         EditText etUsername, etPassword;
         Button btnLogin;
@@ -37,10 +46,27 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loginUser(String username, String password){
-        Log.i(TAG, "Attempting to login user" + username);
+        Log.i(TAG, "Attempting to login user " + username);
         //ToDo navigate to the main activity if the user has signed in properly
+        ParseUser.logInInBackground(username, password, new LogInCallback() {
+            @Override
+            public void done(ParseUser user, ParseException e) {
+                if (e != null){
+                    Log.i(TAG, "Issue with login", e);
+                    return;
+                }
+                Log.i(TAG, "No Issue with login");
+
+                goMainActivity();
+            }
+        });
     }
 
+    private void goMainActivity() {
+        Intent i = new Intent(this, MainActivity.class);
+        startActivity(i);
+        finish();
+    }
 
 
 }
